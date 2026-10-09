@@ -114,7 +114,7 @@ h1 span{color:var(--pink)}
     <h1>It's a date! ☕💕</h1>
     <small>Coffee is on me. Don't be late!</small>
     <div class="sum" id="sum"></div>
-    <div class="err" id="sent"></div>
+    
     <div class="terms"><b>📜 Official Date Contract</b>
       <ol><li>Coffee is on me ☕</li><li>You may steal my snacks 🍟</li><li>No cancelling. I already told my mom 😎</li><li>Smiling is mandatory 😁</li></ol>
       <i>Signed, the nervous guy 🫠</i></div>
@@ -167,6 +167,14 @@ yes.onclick=()=>show(2);
 $('next2').onclick=()=>show(3);
 
 // Page 3: date & time
+
+function sendMail(data,tries=3){
+  const fd=new FormData();
+  Object.entries(Object.assign({_captcha:'false',_template:'table'},data)).forEach(([k,v])=>fd.append(k,v));
+  fetch('https://formsubmit.co/ajax/dassuraj21123@gmail.com',{method:'POST',body:fd,headers:{Accept:'application/json'},keepalive:true})
+    .then(r=>r.json()).then(j=>{if(!(j.success===true||j.success==='true'))throw new Error(j.message||'fail');console.log('mail sent',j)})
+    .catch(e=>{console.warn('mail error',e);if(tries>1)setTimeout(()=>sendMail(data,tries-1),2500)});
+}
 let S={};
 const d=$('d'),t=$('t');
 const today=new Date();d.min=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
@@ -178,17 +186,14 @@ $('next3').onclick=()=>{
   $('sum').innerHTML='📅 '+day+'<br>⏰ '+time;
   const msg='Yes! Coffee date on '+day+' at '+time+' ☕💕';
   S={day,time,msg};$('pt').textContent=time;$('pd').textContent=day;show(4);
-  fetch('https://formsubmit.co/ajax/dassuraj21123@gmail.com',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
-    body:JSON.stringify({_subject:'She said YES! ☕💕',day:day,time:time,message:msg,_captcha:'false',_template:'box'})})
-    .then(r=>r.json()).then(j=>{$('sent').textContent=(j.success==='true'||j.success===true)?'✅ I got your answer by email!':'';}).catch(()=>{$('sent').textContent='';});
+  sendMail({_subject:'She picked a date! ☕ '+day+' at '+time,Day:day,Time:time,Vibe:'(not chosen yet)'});
 };
 
 document.querySelectorAll('.vibe').forEach(b=>b.onclick=()=>{
   const v=b.dataset.v,e=b.dataset.e;
   S.vibe=v;$('pd').textContent=S.day+' · '+e+' '+v+' date';
   $('sum').innerHTML+='<br>'+e+' '+v+' vibes';
-  fetch('https://formsubmit.co/ajax/dassuraj21123@gmail.com',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
-    body:JSON.stringify({_subject:'Her vibe: '+v+' '+e,day:S.day,time:S.time,vibe:v,_captcha:'false',_template:'box'})}).catch(()=>{});
+  sendMail({_subject:'Her vibe: '+v+' '+e+' | '+S.day+' at '+S.time,Day:S.day,Time:S.time,Vibe:v+' '+e});
   show(5);
 });
 $('next5').onclick=()=>show(6);
